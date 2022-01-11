@@ -1,0 +1,74 @@
+{
+  "name": "ms-ide",
+  "displayName": "ms-ide",
+  "description": "开发工具",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.62.3"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:ms-ide.helloWorld",
+    "onCommand:ms-ide.inputCookie",
+    "onCommand:ms-ide.inputHost",
+    "onNotebook:mlsql"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ms-ide.helloWorld",
+        "title": "ms-ide: Hello World"
+      },
+      {
+        "command": "ms-ide.inputCookie",
+        "title": "ms-ide: Input Cookie"
+      },
+      {
+        "command": "ms-ide.inputHost",
+        "title": "ms-ide: Input Host"
+      }
+    ],
+    "notebooks": [
+      {
+        "id": "mlsql",
+        "type": "mlsql",
+        "displayName": "MLSQL NoteBook",
+        "selector": [
+          {
+            "filenamePattern": "*.msnb"
+          }
+        ]
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "14.x",
+    "@types/qs": "^6.9.7",
+    "@types/vscode": "^1.63.0",
+    "@typescript-eslint/eslint-plugin": "^5.1.0",
+    "@typescript-eslint/parser": "^5.1.0",
+    "@vscode/test-electron": "^1.6.2",
+    "eslint": "^8.1.0",
+    "glob": "^7.1.7",
+    "mocha": "^9.1.3",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "axios": "^0.24.0",
+    "nested-json-to-table": "^1.0.10",
+    "qs": "^6.10.2"
+  }
+}
