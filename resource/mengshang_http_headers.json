@@ -4,7 +4,7 @@
 	"Connection": "keep-alive", 
 	"Accept-Language": "zh-CN,zh;q=0.9,zh-TW;q=0.8,en-US;q=0.7,en;q=0.6", 
 	"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8", 
-	"Cookie": "UPMS_SYSTEMID=058393B4B0404FD9BC03C55861D225B9; UPMS_USERTOKEN=790ba13e8324da86e6298f9c65f75cd6", 
-	"Host": "172.16.2.128", 
+	"Cookie": "", 
+	"Host": "", 
 	"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
 }
