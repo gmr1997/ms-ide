@@ -91,10 +91,12 @@ function updateConf(type: string, msg: string, confFilePath: string, confFileDir
                 let temp: ConfInfo = {cookie:confFile.cookie, host:confFile.host};
                 if (type === 'cookie'){
                     temp.cookie = msg;
+                    fs.writeFileSync(confFilePath, JSON.stringify(temp));
                 } else if (type === 'host') {
                     temp.host = msg;
+                    fs.writeFileSync(confFilePath, JSON.stringify(temp));
                 }
-                fs.writeFileSync(confFilePath, JSON.stringify(temp));
+                
             }
         });
     }

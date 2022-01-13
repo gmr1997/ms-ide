@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import {SampleSerializer,Controller} from './notebook';
 import { GetUserInput } from './userinput';
+import * as fs from 'fs';
 
 export function activate(context: vscode.ExtensionContext) {
 

@@ -1,7 +1,19 @@
-import * as vscode from 'vscode';
 import * as qs from 'qs';
+import * as fs from 'fs';
+
 const axios = require('axios');
 const msHttpHeader = require('../resource/mengshang_http_headers.json');
+
+interface HttpHeader{
+    accept: string;
+    acceptEncoding: string;
+    connection: string;
+    acceptLanguage: string;
+    contentType: string;
+    cookie: string;
+    host: string;
+    userAgent: string;
+}
 
 /**
  * 脚本运行步骤：
@@ -13,10 +25,33 @@ const msHttpHeader = require('../resource/mengshang_http_headers.json');
  */
 export class HttpRequestRunScript {
 
+    async initHttpHeader(){
+        let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
+        let tempHeader:HttpHeader;
+        // let ifExist = await isFileExist(confFilePath);
+        if (await isFileExist(confFilePath)==='文件存在') {
+            const confFile = require(confFilePath);
+            tempHeader = {
+                accept:msHttpHeader.Accept, 
+                acceptEncoding:msHttpHeader.AcceptEncoding, 
+                connection:msHttpHeader.Connection, 
+                acceptLanguage:msHttpHeader.AcceptLanguage, 
+                contentType:msHttpHeader.ContentType,
+                cookie:confFile.cookie,
+                host:confFile.host,
+                userAgent:msHttpHeader.userAgent
+            };
+            return tempHeader;
+        }
+    }
+
     // 应该是控制返回条数的，每次运行脚本都会请求一次，
     // 返回100
     public async queryParam():Promise<any>{
         let res: any = '';
+
+        let httpHeader = await this.initHttpHeader();
+
         // data要求string格式
         var data = qs.stringify({
             'keyCode': 'limit_items',
@@ -24,8 +59,8 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://172.16.2.128/bdp-web/query/queryParam',
-            headers: msHttpHeader,
+            url: 'http://'+ httpHeader?.host +'/bdp-web/query/queryParam',
+            headers: httpHeader,
             data : data
         };
         await axios(config).then(function (response: { data: any; }) {
@@ -41,6 +76,9 @@ export class HttpRequestRunScript {
     // 返回 {"jobName":"beba9497-5320-4fdc-9898-6c4b9f35af78","mlsqlIp":"172.16.2.128:9005"}
     public async getMlsqlIp():Promise<any>{
         let res: any = '';
+
+        let httpHeader = await this.initHttpHeader();
+
         // data要求string格式
         var data = qs.stringify({
             'scopeId': 1,
@@ -48,8 +86,8 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://172.16.2.128/bdp-web/query/getMlsqlIp',
-            headers: msHttpHeader,
+            url: 'http://'+ httpHeader?.host +'/bdp-web/query/getMlsqlIp',
+            headers: httpHeader,
             data : data
         };
         await axios(config).then(function (response: { data: any; }) {
@@ -66,6 +104,9 @@ export class HttpRequestRunScript {
     //     {"header":{"msg":"SUCCESS","code":"200","flag":true},"body":"风险检查成功"}
     public async checkJobScriptRisk(checkRiskSql:string, checkRiskIp:string, checkRiskJobName:string):Promise<any>{
         let res: any = '';
+
+        let httpHeader = await this.initHttpHeader();
+
         // data要求string格式
         var data = qs.stringify({
             'scopeId': 1,
@@ -75,8 +116,8 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://172.16.2.128/bdp-web/jobSchema/checkJobScriptRisk',
-            headers: msHttpHeader,
+            url: 'http://'+ httpHeader?.host +'/bdp-web/jobSchema/checkJobScriptRisk',
+            headers: httpHeader,
             data : data
         };
         await axios(config).then(function (response: { data: any; }) {
@@ -92,6 +133,9 @@ export class HttpRequestRunScript {
     // 返回 {"times":"0小时0分0秒","data":"[{\"a\":\"1\",\"b\":\"jack\"}]","mlsql":"172.16.2.128:9005"}
     public async script(runSql:string, runIp:string, runJobName:string):Promise<any>{
         let res = '';
+
+        let httpHeader = await this.initHttpHeader();
+
         // data要求string格式
         var data = qs.stringify({
             'sql': runSql,
@@ -102,8 +146,8 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://172.16.2.128/bdp-web/query/run/script',
-            headers: msHttpHeader,
+            url: 'http://'+ httpHeader?.host +'/bdp-web/query/run/script',
+            headers: httpHeader,
             data : data
         };
         await axios(config).then(function (response: { data: any; }) {
@@ -121,7 +165,7 @@ export class HttpRequestRunScript {
         console.log('====开始queryParam====');
         let queryParamRes = await this.queryParam();
         if (queryParamRes.data !== 100){
-            return {'data':'queryParam请求失败'};
+            return {'data':'queryParam请求失败，请检查是否已经配置Cookie以及host'};
         }
 
         console.log('====开始getCheckRiskMlsqlIp====');
@@ -149,4 +193,16 @@ export class HttpRequestRunScript {
         return scriptRes;
     }
 
+}
+
+function isFileExist(filePath: string):Promise<string> {
+    return new Promise(function(resolve, reject){
+        fs.access(filePath, (err) => {
+            if(err){
+                resolve('文件不存在');
+            }else {
+                resolve('文件存在');
+            }
+        });
+    });
 }
