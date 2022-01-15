@@ -2,7 +2,7 @@ import * as qs from 'qs';
 import * as fs from 'fs';
 
 const axios = require('axios');
-const msHttpHeader = require('../resource/mengshang_http_headers.json');
+const msHttpHeader = require('../resource/ms_http_headers.json');
 
 interface HttpHeader{
     accept: string;
@@ -25,32 +25,13 @@ interface HttpHeader{
  */
 export class HttpRequestRunScript {
 
-    async initHttpHeader(){
-        let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
-        let tempHeader:HttpHeader;
-        // let ifExist = await isFileExist(confFilePath);
-        if (await isFileExist(confFilePath)==='文件存在') {
-            const confFile = require(confFilePath);
-            tempHeader = {
-                accept:msHttpHeader.Accept, 
-                acceptEncoding:msHttpHeader.AcceptEncoding, 
-                connection:msHttpHeader.Connection, 
-                acceptLanguage:msHttpHeader.AcceptLanguage, 
-                contentType:msHttpHeader.ContentType,
-                cookie:confFile.cookie,
-                host:confFile.host,
-                userAgent:msHttpHeader.userAgent
-            };
-            return tempHeader;
-        }
-    }
-
     // 应该是控制返回条数的，每次运行脚本都会请求一次，
     // 返回100
     public async queryParam():Promise<any>{
         let res: any = '';
 
-        let httpHeader = await this.initHttpHeader();
+        let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
+        let httpHeader = require(confFilePath);
 
         // data要求string格式
         var data = qs.stringify({
@@ -59,7 +40,7 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://'+ httpHeader?.host +'/bdp-web/query/queryParam',
+            url: 'http://'+ httpHeader?.Host +'/bdp-web/query/queryParam',
             headers: httpHeader,
             data : data
         };
@@ -69,6 +50,7 @@ export class HttpRequestRunScript {
             res = error;
             console.log(error);
         });
+
         return res;
     }
 
@@ -77,7 +59,8 @@ export class HttpRequestRunScript {
     public async getMlsqlIp():Promise<any>{
         let res: any = '';
 
-        let httpHeader = await this.initHttpHeader();
+        let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
+        let httpHeader = require(confFilePath);
 
         // data要求string格式
         var data = qs.stringify({
@@ -86,7 +69,7 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://'+ httpHeader?.host +'/bdp-web/query/getMlsqlIp',
+            url: 'http://'+ httpHeader?.Host +'/bdp-web/query/getMlsqlIp',
             headers: httpHeader,
             data : data
         };
@@ -105,7 +88,8 @@ export class HttpRequestRunScript {
     public async checkJobScriptRisk(checkRiskSql:string, checkRiskIp:string, checkRiskJobName:string):Promise<any>{
         let res: any = '';
 
-        let httpHeader = await this.initHttpHeader();
+        let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
+        let httpHeader = require(confFilePath);
 
         // data要求string格式
         var data = qs.stringify({
@@ -116,7 +100,7 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://'+ httpHeader?.host +'/bdp-web/jobSchema/checkJobScriptRisk',
+            url: 'http://'+ httpHeader?.Host +'/bdp-web/jobSchema/checkJobScriptRisk',
             headers: httpHeader,
             data : data
         };
@@ -134,7 +118,8 @@ export class HttpRequestRunScript {
     public async script(runSql:string, runIp:string, runJobName:string):Promise<any>{
         let res = '';
 
-        let httpHeader = await this.initHttpHeader();
+        let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
+        let httpHeader = require(confFilePath);
 
         // data要求string格式
         var data = qs.stringify({
@@ -146,7 +131,7 @@ export class HttpRequestRunScript {
         });
         var config = {
             method: 'post',
-            url: 'http://'+ httpHeader?.host +'/bdp-web/query/run/script',
+            url: 'http://'+ httpHeader?.Host +'/bdp-web/query/run/script',
             headers: httpHeader,
             data : data
         };
@@ -164,8 +149,8 @@ export class HttpRequestRunScript {
 
         console.log('====开始queryParam====');
         let queryParamRes = await this.queryParam();
-        if (queryParamRes.data !== 100){
-            return {'data':'queryParam请求失败，请检查是否已经配置Cookie以及host'};
+        if (queryParamRes.status !== 200){
+            return {'data':'queryParam请求失败，请检查是否已经配置Cookie'};
         }
 
         console.log('====开始getCheckRiskMlsqlIp====');
@@ -176,7 +161,6 @@ export class HttpRequestRunScript {
 
         console.log('====开始checkJobScriptRisk====');
         let checkJobScriptRiskRes = await this.checkJobScriptRisk(sql, getCheckRiskMlsqlIpRes.data.mlsqlIP, getCheckRiskMlsqlIpRes.data.jobName);
-        // console.log(checkJobScriptRiskRes);
         if (!checkJobScriptRiskRes.data.header.flag){
             return {'data':'checkJobScriptRisk请求失败'};
         }

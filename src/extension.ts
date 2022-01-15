@@ -15,12 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
 		conf.getCookie();
 	});
 
-	let inputHost = vscode.commands.registerCommand('ms-ide.inputHost', () => {
-		let conf = new GetUserInput();
-		conf.getHost();
-		
-	});
-
 	// mlsql notebook文件序列化
 	let notebook = vscode.workspace.registerNotebookSerializer('mlsql', new SampleSerializer());
 
@@ -31,8 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(notebook);
 	context.subscriptions.push(notebookController);
 	context.subscriptions.push(inputCookie);
-	context.subscriptions.push(inputHost);
-
 }
 
 export function deactivate() {}

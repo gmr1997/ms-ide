@@ -109,19 +109,17 @@ export class Controller {
       
       let runScript = new HttpRequestRunScript();
       let resultJson = await runScript.runSqlScriptSafty(code);
-      // let resultJson = await runScript.queryParam();
-      
-      console.log('resultJson.data为：' + resultJson.data);
 
       let result : vscode.NotebookCellOutputItem = vscode.NotebookCellOutputItem.text('未定义');
 
       try {
-        let resultDataString = resultJson.data.replace('[','').replace(']','');
         // 字符串解析为JSON对象
-        let resultDataJson = JSON.parse(resultDataString);
+        let htmlTable = jsonToHTMLTable(JSON.parse(resultJson.data));
+        // console.log(htmlTable);
         // JSON对象解析为html表格，让notebook渲染表格
-        result = vscode.NotebookCellOutputItem.text(jsonToHTMLTable([resultDataJson]),'text/html');
+        result = vscode.NotebookCellOutputItem.text(htmlTable,'text/html');
       } catch (error) {
+        console.log(error);
         // 异常一般是因为sql语法有问题，返回的数据不是想要的，导致解析JSON失败，这里直接让notebook渲染服务器返回的异常信息
         result = vscode.NotebookCellOutputItem.error(new Error(resultJson.data));
       }

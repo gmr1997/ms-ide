@@ -1,15 +1,6 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 
-/**
- * 接收用户输入内容的接口
- */
-interface ConfInfo{
-    // 浏览器cookie
-    cookie: string;
-    // 可以是ip，也可以是域名
-    host: string;
-}
 
 /**
  * 弹出输入框，并获取输入框内容写到配置文件中
@@ -18,38 +9,27 @@ export class GetUserInput {
 
     public getCookie(){
         vscode.window.showInputBox({placeHolder:'请输入Cookie', ignoreFocusOut:true, prompt:'按回车确认，按ESC取消输入'}).then(function(msg){
-            let confInfo: ConfInfo = {cookie:'undefined', host:'localhost'};
+            const defaultHttpHeader = require('../resource/ms_http_headers.json');
+            console.log(defaultHttpHeader);
             let confFileDir = process.env.USERPROFILE + '\\.mside';
             let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
-            console.log('用户输入的Cookie为：:' + msg);
+            console.log(`用户输入的Cookie为：:${msg}` );
 
-            updateConf('cookie', msg!, confFilePath, confFileDir, confInfo);
+            updateConf(msg!, confFilePath, confFileDir, defaultHttpHeader);
         });
         
-    }
-
-    public getHost(){
-        vscode.window.showInputBox({placeHolder:'请输入host', ignoreFocusOut:true, prompt:'按回车确认，按ESC取消输入'}).then(function(msg){
-            let confInfo: ConfInfo = {cookie:'undefined', host:'localhost'};
-            let confFileDir = process.env.USERPROFILE + '\\.mside';
-            let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
-            console.log('用户输入的host为：:' + msg);
-
-            updateConf('host', msg!, confFilePath, confFileDir, confInfo);
-        });
     }
 }
 
 /**
  * 获取用户input输入的配置信息，写入配置文件
  * 
- * @param type 用户输入信息类型
  * @param msg 输入的内容
  * @param confFilePath 配置文件路径
  * @param confFileDir 配置文件父目录
  * @param confInfo 配置文件初始化信息
  */
-function updateConf(type: string, msg: string, confFilePath: string, confFileDir: string, confInfo: ConfInfo){
+function updateConf(msg: string, confFilePath: string, confFileDir: string, confInfo: any){
     if (msg){
         // 读取配置文件，如果不存在则创建
         fs.stat(confFilePath, (err, stats) => {
@@ -74,13 +54,9 @@ function updateConf(type: string, msg: string, confFilePath: string, confFileDir
                         }
                         console.log(confFilePath + '新建文件成功');
                         const confFile = require(confFilePath);
-                        let temp: ConfInfo = {cookie:confFile.cookie, host:confFile.host};
-                        if (type === 'cookie'){
-                            temp.cookie = msg;
-                        } else if (type === 'host') {
-                            temp.host = msg;
-                        }
-                        fs.writeFileSync(confFilePath, JSON.stringify(temp));
+                        confFile.Cookie = msg;
+                        console.log(`替换后的Cookie为:${msg}`);
+                        fs.writeFileSync(confFilePath, JSON.stringify(confFile));
                     });
                     
                 });
@@ -88,14 +64,9 @@ function updateConf(type: string, msg: string, confFilePath: string, confFileDir
             } else {
                 console.log(confFilePath + '文件存在，stats为：' + JSON.stringify(stats));
                 const confFile = require(confFilePath);
-                let temp: ConfInfo = {cookie:confFile.cookie, host:confFile.host};
-                if (type === 'cookie'){
-                    temp.cookie = msg;
-                    fs.writeFileSync(confFilePath, JSON.stringify(temp));
-                } else if (type === 'host') {
-                    temp.host = msg;
-                    fs.writeFileSync(confFilePath, JSON.stringify(temp));
-                }
+                confFile.Cookie = msg;
+                console.log(`替换后的Cookie为:${msg}`);
+                fs.writeFileSync(confFilePath, JSON.stringify(confFile));
                 
             }
         });

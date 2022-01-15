@@ -12,7 +12,6 @@
   "activationEvents": [
     "onCommand:ms-ide.helloWorld",
     "onCommand:ms-ide.inputCookie",
-    "onCommand:ms-ide.inputHost",
     "onNotebook:mlsql"
   ],
   "main": "./out/extension.js",
@@ -25,10 +24,6 @@
       {
         "command": "ms-ide.inputCookie",
         "title": "ms-ide: Input Cookie"
-      },
-      {
-        "command": "ms-ide.inputHost",
-        "title": "ms-ide: Input Host"
       }
     ],
     "notebooks": [
@@ -57,7 +52,7 @@
     "@types/mocha": "^9.0.0",
     "@types/node": "14.x",
     "@types/qs": "^6.9.7",
-    "@types/vscode": "^1.63.0",
+    "@types/vscode": "^1.62.3",
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "@vscode/test-electron": "^1.6.2",
