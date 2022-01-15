@@ -134,4 +134,4 @@ dist
 *.vsix
 
 # 项目配置文件
-.resource/
+# .resource/*
