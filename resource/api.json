@@ -1,6 +1,0 @@
-{
-    "queryParam":"query/queryParam",
-    "getMlsqlIp":"query/getMlsqlIp",
-    "checkJobScriptRisk":"jobSchema/checkJobScriptRisk",
-    "script":"query/run/script"
-}
