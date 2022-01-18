@@ -93,9 +93,8 @@ export class Controller {
     private async _doExecution(cell: vscode.NotebookCell): Promise<void> {
       const execution = this._controller.createNotebookCellExecution(cell);
       execution.executionOrder = ++this._executionOrder;
-      execution.start(Date.now()); // Keep track of elapsed time to execute cell.
+      execution.start(Date.now());
       
-      /* Do some execution here; not implemented */
       let code = cell.document.getText();
       console.log('正在运行:' + code);
 
@@ -110,23 +109,16 @@ export class Controller {
       let runScript = new HttpRequestRunScript();
       let resultJson = await runScript.runSqlScriptSafty(code);
 
-      let result : vscode.NotebookCellOutputItem = vscode.NotebookCellOutputItem.text('未定义');
-
       try {
-        // 字符串解析为JSON对象
-        let htmlTable = jsonToHTMLTable(JSON.parse(resultJson.data));
-        // console.log(htmlTable);
-        // JSON对象解析为html表格，让notebook渲染表格
-        result = vscode.NotebookCellOutputItem.text(htmlTable,'text/html');
+        resultJson = vscode.NotebookCellOutputItem.json(JSON.parse(resultJson.data));
       } catch (error) {
         console.log(error);
         // 异常一般是因为sql语法有问题，返回的数据不是想要的，导致解析JSON失败，这里直接让notebook渲染服务器返回的异常信息
-        result = vscode.NotebookCellOutputItem.error(new Error(resultJson.data));
+        resultJson = vscode.NotebookCellOutputItem.error(new Error(resultJson.data));
       }
       execution.replaceOutput([
         new vscode.NotebookCellOutput([
-          result,
-          // vscode.NotebookCellOutputItem.json(result),
+          resultJson
           // vscode.NotebookCellOutputItem.text(result, 'text/html'),
         ])
       ]);

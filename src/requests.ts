@@ -4,15 +4,27 @@ import * as fs from 'fs';
 const axios = require('axios');
 const msHttpHeader = require('../resource/ms_http_headers.json');
 
-interface HttpHeader{
-    accept: string;
-    acceptEncoding: string;
-    connection: string;
-    acceptLanguage: string;
-    contentType: string;
-    cookie: string;
-    host: string;
-    userAgent: string;
+/**
+ * 脚本任务信息
+ * 
+ * 封装该信息，方便通过该类获取正在运行脚本的任务名来kill掉任务
+ */
+export class JobInfo{
+    constructor(){};
+    private jobName!:string;
+    private mlsqlIp!:string;
+    public getJobName(){
+        return this.jobName;
+    }
+    public setMlsqlIp(name:string){
+        this.jobName = name;
+    }
+    public getMlsqlIp(){
+        return this.mlsqlIp;
+    }
+    public setJobName(ip:string){
+        this.mlsqlIp = ip;
+    }
 }
 
 /**
@@ -56,23 +68,37 @@ export class HttpRequestRunScript {
 
     // 获取脚本执行机器ip
     // 返回 {"jobName":"beba9497-5320-4fdc-9898-6c4b9f35af78","mlsqlIp":"172.16.2.128:9005"}
-    public async getMlsqlIp():Promise<any>{
+    public async getMlsqlIp(type: string):Promise<any>{
         let res: any = '';
 
         let confFilePath = process.env.USERPROFILE + '\\.mside\\conf.json';
         let httpHeader = require(confFilePath);
 
         // data要求string格式
-        var data = qs.stringify({
+        var dataHck = qs.stringify({
             'scopeId': 1,
             'source': 'hck'
         });
-        var config = {
-            method: 'post',
-            url: 'http://'+ httpHeader?.Host +'/bdp-web/query/getMlsqlIp',
-            headers: httpHeader,
-            data : data
-        };
+        var dataIde = qs.stringify({
+            'scopeId': 1,
+            'source': 'ide'
+        });
+        if (type === 'hck'){
+            var config = {
+                method: 'post',
+                url: 'http://'+ httpHeader?.Host +'/bdp-web/query/getMlsqlIp',
+                headers: httpHeader,
+                data : dataHck
+            };
+        } else {
+            var config = {
+                method: 'post',
+                url: 'http://'+ httpHeader?.Host +'/bdp-web/query/getMlsqlIp',
+                headers: httpHeader,
+                data : dataIde
+            };
+        }
+        
         await axios(config).then(function (response: { data: any; }) {
             res = response;
         }).catch(function (error: any) {
@@ -147,6 +173,8 @@ export class HttpRequestRunScript {
     // 按部就班的执行，安全
     public async runSqlScriptSafty(sql:string):Promise<any>{
 
+        let jobInfo = new JobInfo();
+
         console.log('====开始queryParam====');
         let queryParamRes = await this.queryParam();
         if (queryParamRes.status !== 200){
@@ -154,7 +182,7 @@ export class HttpRequestRunScript {
         }
 
         console.log('====开始getCheckRiskMlsqlIp====');
-        let getCheckRiskMlsqlIpRes = await this.getMlsqlIp();
+        let getCheckRiskMlsqlIpRes = await this.getMlsqlIp('hck');
         if (getCheckRiskMlsqlIpRes.data.jobName === undefined){
             return {'data':'getMlsqlIp请求失败'};
         }
@@ -166,14 +194,18 @@ export class HttpRequestRunScript {
         }
         
         console.log('====开始getRunMlsqlIp====');
-        let getRunMlsqlIpRes = await this.getMlsqlIp();
+        let getRunMlsqlIpRes = await this.getMlsqlIp('ide');
         if (getRunMlsqlIpRes.data.jobName === ''){
             return {'data':'getMlsqlIp请求失败'};
         }
 
+        jobInfo.setJobName(getRunMlsqlIpRes.data.jobName);
+        jobInfo.setMlsqlIp(getRunMlsqlIpRes.data.mlsqlIp);
+        console.log(jobInfo);
+
         console.log('====开始script====');
         let scriptRes = await this.script(sql, getRunMlsqlIpRes.data.mlsqlIP, getRunMlsqlIpRes.data.jobName);
-
+        console.log(scriptRes);
         return scriptRes;
     }
 
